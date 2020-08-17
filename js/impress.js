@@ -1569,21 +1569,25 @@
     "use strict";
 
     var preInit = function() {
-        if ( window.markdown ) {
+        if ( window.showdown ) {
 
             // Unlike the other extras, Markdown.js doesn't by default do anything in
             // particular. We do it ourselves here.
             // In addition, we use "-----" as a delimiter for new slide.
 
             // Query all .markdown elements and translate to HTML
-            var markdownDivs = document.querySelectorAll( ".markdown" );
-            for ( var idx = 0; idx < markdownDivs.length; idx++ ) {
-              var element = markdownDivs[ idx ];
-              var dialect = element.dataset.markdownDialect;
+            var showdownDivs = document.querySelectorAll( ".markdown" );
+            for ( var idx = 0; idx < showdownDivs.length; idx++ ) {
+              var element = showdownDivs[ idx ];
+              var dialect = element.dataset.showdownDialect ?? 'github';
+              showdown.setFlavor(dialect);
+              var conv = new showdown.Converter({metadata: true});
 
               var slides = element.textContent.split( /^-----$/m );
               var i = slides.length - 1;
-              element.innerHTML = markdown.toHTML( slides[ i ], dialect );
+              console.log(slides[ i ]);
+              console.log(conv.makeHtml(slides[ i ]));
+              element.innerHTML = conv.makeHtml( slides[ i ] );
 
               // If there's an id, unset it for last, and all other, elements,
               // and then set it for the first.
@@ -1595,7 +1599,7 @@
               i--;
               while ( i >= 0 ) {
                 var newElement = element.cloneNode( false );
-                newElement.innerHTML = markdown.toHTML( slides[ i ] );
+                newElement.innerHTML = conv.makeHtml( slides[ i ] );
                 element.parentNode.insertBefore( newElement, element );
                 element = newElement;
                 i--;
@@ -1604,7 +1608,7 @@
                 element.id = id;
               }
             }
-        } // Markdown
+        } // Showdown
 
         if ( window.hljs ) {
             hljs.initHighlightingOnLoad();
